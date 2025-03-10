@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/styles/styles.css">
+  <style>
+     body {
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f7fc;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    }
+    
+    .logo-container {
+      width: 100%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      position: relative;
+      transition: background-color 0.5s ease-in-out;
+    }
+    
+    .logo-img {
+      display: flex;
+      align-items: center;
+    }
+  
+    .logo {
+      width: 200px; 
+      height: auto;
+    }
+  
+    .logo-header {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 1.5rem;
+      font-family: 'Open Sans', sans-serif;
+      color: #004085;
+      transition: color 0.5s ease-in-out;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1600px;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+      margin-top: 20px;
+      transition: background 0.5s ease-in-out;
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .dark-mode {
+      background-color: #1e1e1e;
+      color: white;
+    }
+    
+    .dark-mode .container {
+      background: #2c2c2c;
+    }
+
+    .dark-mode .logo-container {
+      background: #333;
+    }
+
+    .dark-mode .logo-header {
+      color: #f4f7fc;
+    }
+    
+    .result {
+      text-align: center;
+      margin-top: 20px;
+      padding: 20px;
+      background: #e9f2fd;
+      border: 1px solid #b3d7ff;
+      border-radius: 8px;
+      font-size: 24px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    .dark-mode .result {
+      background: #3a3a3a;
+      border: 1px solid #555;
+    }
+    
+    .failure-text {
+      color: #004085;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      font-size: 34px;
+      transition: color 0.5s ease-in-out;
+    }
+    .dark-mode .failure-text {
+      color: #ffcc00;
+    }
+    .recommendation-container {
+      list-style: none;
+      padding: 0;
+    }
+    .recommendation-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #b3d7ff;
+      border-radius: 8px;
+      background-color: #ffffff;
+      position: relative}
+
+    .toggle-switch {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #004085;
+      transition: color 0.5s ease-in-out;
+    }
+    
+    .dark-mode .toggle-switch {
+      color: #f4f7fc;
+    }
+
+    .failure-image img {
+      width: 750px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .failure-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #004085;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      font-size: 34px;
+      text-align: center;
+      padding: 5px 10px;
+      border-radius: 5px;
+      width: 80%;
+    }
+
+    .footer {
+     text-align: center;
+     margin-top: 30px;
+     font-size: 1rem;
+     font-weight: 700;
+     color: #004085;
+   }
+   .footer a {
+     color: #0056b3;
+     font-weight: 700;
+     text-decoration: none;
+   }
+   .footer a:hover {
+     text-decoration: underline;
+   }
+   .copyright {
+     margin-top: 10px;
+     font-size: 0.9rem;
+     color: #6c757d;
+   }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <div class="logo-img">
+      <img src="/static/images/logo.png" alt="Company Logo" class="logo">
+    </div>
+    <div class="logo-header">
+      <h1>Predictive Maintenance System</h1>
+    </div>
+    <div class="toggle-switch" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="result">
+      <h2>Prediction Result</h2>
+      <p class="prediction-text">{{ prediction }}</p><br>
+      <h3>Failure May Also Happen Related to This Failure Type:</h3>
+      <ul class="recommendation-container">
+        {% for rec in recommendations %}
+        <li class="recommendation-box">
+          <div class="failure-image">
+            <img src="{{ rec.image }}" alt="Failure Image" class="failure-image">
+          </div>
+          <div class="failure-text">
+            <p>{{ rec.name }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Powered by <a href="https://iattechnologies.com/" target="_blank">IAT Technologies</a></p>
+      <p class="copyright">© 2025 Developed by Dev-Team</p>
+    </div>
+  </div>
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>

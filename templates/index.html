@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predictive Maintenance System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/styles/styles.css"> 
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f7fc;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    }
+
+    
+    .logo-container {
+      width: 100%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      position: relative;
+      transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    }
+    
+    .logo-img {
+      display: flex;
+      align-items: center;
+    }
+  
+    .logo {
+      width: 200px; 
+      height: auto;
+    }
+  
+    .logo-header {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 1.5rem;
+      font-family: 'Open Sans', sans-serif;
+      color: #004085;
+      transition: color 0.5s ease-in-out;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1600px;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+      margin-top: 20px;
+      transition: background 0.5s ease-in-out;
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .dark-mode {
+      background-color: #1e1e1e;
+      color: white;
+    }
+    
+    .dark-mode .container {
+      background: #2c2c2c;
+    }
+
+    .dark-mode .logo-container {
+      background: #333;
+    }
+
+    .dark-mode .logo-header {
+      color: #f4f7fc;
+    }
+    
+    .dark-mode label, .dark-mode .footer {
+      color: white;
+    }
+    
+    .dark-mode input, .dark-mode select {
+      background: #3a3a3a;
+      color: white;
+      border: 1px solid #555;
+    }
+    
+    .toggle-switch {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #004085;
+      transition: color 0.5s ease-in-out;
+    }
+    
+    .dark-mode .toggle-switch {
+      color: #f4f7fc;
+    }
+  
+    .form-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr)); 
+      gap: 35px 30px; 
+      align-items: start; 
+      column-gap: 10px;
+    }
+  
+    .input-group {
+      margin: 10px; 
+    }
+  
+    label {
+      display: block;
+      margin: 10px; 
+      padding: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+      white-space: nowrap;
+      column-gap: 5px;
+    }
+  
+    input[type="number"],
+    select {
+      width: 90%;
+      padding: 14px; 
+      font-size: 1rem;
+      border: 1px solid #ced4da;
+      margin: 10px;
+      border-radius: 5px;
+      background: #ffffff;
+      color: #333;
+      transition: border-color 0.3s ease;
+      column-gap: 5px;
+    }
+  
+    input[type="number"]:focus,
+    select:focus {
+      width: 100%;
+      border-color: #007bff;
+      outline: none;
+      margin: 10px;
+    }
+  
+    .submit-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+  
+    button {
+      padding: 14px 30px;
+      width: 40%;
+      font-size: 1.2rem;
+      color: #ffffff;
+      background: #007bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+  
+    button:hover {
+      background: #0056b3;
+    }
+  
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #004085;
+    }
+  
+    .footer a {
+      color: #0056b3;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  
+    .copyright {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <div class="logo-img">
+      <img src="/static/images/logo.png" alt="Company Logo" class="logo">
+    </div>
+    <div class="logo-header">
+      <h1>Predictive Maintenance System</h1>
+    </div>
+    <div class="toggle-switch" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+    </div>
+  </div>
+   <div class="container">
+
+     <form action="/predict" method="post"> 
+      <div class="form-grid">
+        <!-- Column 1 -->
+        <div>
+            <div class="input-group">
+                <label for="operationTime">Operation Time <i class="fas fa-info-circle" title="Time the machine has been operating"></i></label>
+                <input type="number" id="operationTime" name="OperationTime">
+            </div>
+            <div class="input-group">
+                <label for="cuttingSpeed">Cutting Speed</label>
+                <input type="number" id="cuttingSpeed" name="CuttingSpeed">
+            </div>
+            <div class="input-group">
+                <label for="feedRate">Feed Rate</label>
+                <input type="number" id="feedRate" name="FeedRate">
+            </div>
+            <div class="input-group">
+                <label for="toolType">Tool Type</label>
+                <select id="toolType" name="ToolType">
+                  <option value="HSS">HSS</option>
+                  <option value="Carbide">Carbide</option>
+                  <option value="Ceramic">Ceramic</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="toolDiameter">Tool Diameter</label>
+                <input type="number" id="toolDiameter" name="ToolDiameter">
+            </div>
+            <div class="input-group">
+                <label for="spindleSpeed">Spindle Speed</label>
+                <input type="number" id="spindleSpeed" name="SpindleSpeed">
+            </div>
+            <div class="input-group">
+                <label for="motorCurrent">Motor Current</label>
+                <input type="number" id="motorCurrent" name="MotorCurrent">
+            </div>
+            <div class="input-group">
+                <label for="powerConsumption">Power Consumption</label>
+                <input type="number" id="powerConsumption" name="PowerConsumption">
+            </div>
+            <div class="input-group">
+                <label for="lubricationLevel">Lubrication Level</label>
+                <input type="number" id="lubricationLevel" name="LubricationLevel">
+            </div>
+        </div>
+        <div>
+            <div class="input-group">
+                <label for="coolingEfficiency">Cooling System Efficiency</label>
+                <input type="number" id="coolingEfficiency" name="CoolingSystemEfficiency">
+            </div>
+            <div class="input-group">
+                <label for="cycleTime">Cycle Time</label>
+                <input type="number" id="cycleTime" name="CycleTime">
+            </div>
+            <div class="input-group">
+                <label for="machineAge">Machine Age</label>
+                <input type="number" id="machineAge" name="MachineAge">
+            </div>
+            <div class="input-group">
+                <label for="partDefectRate">Part Defect Rate</label>
+                <input type="number" id="partDefectRate" name="PartDefectRate">
+            </div>
+            <div class="input-group">
+                <label for="maintenanceFrequency">Maintenance Frequency</label>
+                <input type="number" id="maintenanceFrequency" name="MaintenanceFrequency">
+            </div>
+            <div class="input-group">
+                <label for="vibrationLevel">Vibration Level</label>
+                <input type="number" id="vibrationLevel" name="VibrationLevel">
+            </div>
+            <div class="input-group">
+                <label for="machineHealth">Machine Health Status</label>
+                <input type="number" id="machineHealth" name="MachineHealthStatus">
+            </div>
+            <div class="input-group">
+                <label for="toolWearRate">Tool Wear Rate</label>
+                <input type="number" id="toolWearRate" name="ToolWearRate">
+            </div>
+            <div class="input-group">
+                <label for="cuttingTemp">Cutting Temperature</label>
+                <input type="number" id="cuttingTemp" name="CuttingTemperature">
+            </div>
+        </div>
+        <div>
+            <div class="input-group">
+                <label for="materialType">Material Type</label>
+                <select id="materialType" name="MaterialType">
+                  <option value="Titanium">Titanium</option>
+                  <option value="Plastic">Plastic</option>
+                  <option value="Aluminium">Aluminium</option>
+                  <option value="Steel">Steel</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="materialHardness">Material Hardness</label>
+                <input type="number" id="materialHardness" name="MaterialHardness">
+            </div>
+            <div class="input-group">
+                <label for="pressureLevel">Pressure Level</label>
+                <input type="number" id="pressureLevel" name="PressureLevel">
+            </div>
+            <div class="input-group">
+                <label for="machineStability">Machine Stability</label>
+                <input type="number" id="machineStability" name="MachineStability">
+            </div>
+            <div class="input-group">
+                <label for="machineAlignment">Machine Alignment Status</label>
+                <select id="machineAlignment" name="MachineAlignmentStatus">
+                  <option value="Aligned">Aligned</option>
+                  <option value="Mis-Aligned">Not Aligned</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="powerSurgeRate">Power Surge Rate</label>
+                <input type="number" id="powerSurgeRate" name="PowerSurgeRate">
+            </div>
+            <div class="input-group">
+                <label for="machineCalibration">Machine Calibration</label>
+                <input type="number" id="machineCalibration" name="MachineCalibration">
+            </div>
+            <div class="input-group">
+                <label for="toolChangeInterval">Tool Change Interval</label>
+                <input type="number" id="toolChangeInterval" name="ToolChangeInterval">
+            </div>
+            <div class="input-group">
+                <label for="spindleHealth">Spindle Health Status</label>
+                <input type="number" id="spindleHealth" name="SpindleHealthStatus">
+            </div>
+        </div>
+        <div>
+            <div class="input-group">
+                <label for="lubricationCondition">Lubrication Condition</label>
+                <select id="lubricationCondition" name="LubricationCondition">
+                  <option value="Fair">Fair</option>
+                  <option value="Good">Good</option>
+                  <option value="Poor">Poor</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="coolantFlowRate">Coolant Flow Rate</label>
+                <input type="number" id="coolantFlowRate" name="CoolantFlowRate">
+            </div>
+            <div class="input-group">
+                <label for="cuttingForce">Cutting Force</label>
+                <input type="number" id="cuttingForce" name="CuttingForce">
+            </div>
+            <div class="input-group">
+                <label for="operationMode">Operation Mode</label>
+                <select id="operationMode" name="OperationMode">
+                  <option value="Manual">Manual</option>
+                  <option value="Semi-Automatic">Semi-Automatic</option>
+                  <option value="Automatic">Automatic</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="machineLoad">Machine Load</label>
+                <input type="number" id="machineLoad" name="MachineLoad">
+            </div>
+            <div class="input-group">
+                <label for="spindleTorque">Spindle Torque</label>
+                <input type="number" id="spindleTorque" name="SpindleTorque">
+            </div>
+            <div class="input-group">
+                <label for="spindleCondition">Spindle Condition</label>
+                <select id="spindleCondition" name="SpindleCondition">
+                  <option value="Good">Good</option>
+                  <option value="Warning">Warning</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="powerSupplyVoltage">Power Supply Voltage</label>
+                <input type="number" id="powerSupplyVoltage" name="PowerSupplyVoltage">
+            </div>
+        </div>
+      </div>
+      <div class="submit-button">
+        <button type="submit">Predict</button>
+      </div>
+    </form>
+
+    <div class="footer">
+      <p>Powered by <a href="https://iattechnologies.com/" target="_blank">IAT Technologies</a></p>
+      <p class="copyright">© 2025 Developed by Dev-Team</p>
+    </div>
+  </div>
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
