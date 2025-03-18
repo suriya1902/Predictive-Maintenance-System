@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predictive Maintenance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      width: 100%;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      text-align: center;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #00d4ff;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header .logo {
+      height: 40px;
+      width: auto;
+    }
+    .controls {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .controls select {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      background: #203a43;
+      color: #fff;
+      border: 1px solid #00d4ff;
+    }
+    .controls a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+    .controls a:hover {
+      text-decoration: underline;
+    }
+    .settings-dropdown {
+      position: absolute;
+      top: 40px;
+      right: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+      display: none;
+      z-index: 2000;
+    }
+    .settings-dropdown label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .settings-dropdown input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #00d4ff;
+      background: #203a43;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .settings-dropdown button {
+      width: 100%;
+      padding: 8px;
+      background: #00d4ff;
+      border: none;
+      border-radius: 5px;
+      color: #0f2027;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .settings-dropdown button:hover {
+      background: #00b3cc;
+    }
+    .dashboard {
+      max-width: 1400px;
+      width: 90%;
+      margin: 100px auto 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .panel {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+      transition: transform 0.3s ease;
+    }
+    .history-panel {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+      margin-top: 20px;
+    }
+    .panel:hover, .history-panel:hover {
+      transform: translateY(-5px);
+    }
+    .panel h2, .history-panel h2 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #00d4ff;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .data-container {
+      max-height: 400px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      width: 100%;
+      flex-grow: 1;
+    }
+    .data-item {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #0f2027;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .data-item strong {
+      color: #203a43;
+      font-weight: 600;
+    }
+    .data-item.loading {
+      justify-content: center;
+      background: none;
+      box-shadow: none;
+      height: 100%;
+      font-size: 1.2rem;
+      color: #00d4ff;
+    }
+    .prediction-container, .forecast-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .status-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+    .status-card .icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .status-card .good { background: #00ff00; }
+    .status-card .warning { background: #ffcc00; }
+    .status-card .critical { background: #ff4d4d; }
+    .alert {
+      background: #ff4d4d;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: blink 1s infinite;
+      cursor: pointer;
+    }
+    @keyframes blink {
+      50% { opacity: 0.7; }
+    }
+    .prediction-card {
+      background: linear-gradient(135deg, #00d4ff, #0f2027);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+      animation: pulse 2s infinite;
+    }
+    .forecast-card {
+      background: linear-gradient(135deg, #ffcc00, #203a43);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+      50% { box-shadow: 0 4px 25px rgba(0, 212, 255, 0.5); }
+      100% { box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+    }
+    .prediction-card h3, .forecast-card h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 10px;
+      color: #fff;
+    }
+    .prediction-card p, .forecast-card p {
+      font-size: 1.1rem;
+      margin: 5px 0;
+      color: #e0f7ff;
+    }
+    .forecast-chart {
+      max-height: 200px;
+      width: 100%;
+    }
+    .recommendations {
+      min-height: 150px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    .recommendation-box {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      color: #0f2027;
+    }
+    .recommendation-box img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .recommendation-box p {
+      font-weight: 600;
+      margin: 0;
+    }
+    .recommendation-box.error {
+      background: #ff4d4d;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .history-table th, .history-table td {
+      padding: 10px;
+      text-align: left;
+      color: #0f2027;
+      font-size: 0.9rem;
+    }
+    .history-table th {
+      background: #203a43;
+      color: #fff;
+      font-weight: 600;
+    }
+    .history-table tr:nth-child(even) {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .download-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #00d4ff;
+      border: none;
+      border-radius: 5px;
+      color: #0f2027;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .download-btn:hover {
+      background: #00b3cc;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      color: #0f2027;
+      position: relative;
+      animation: slideIn 0.3s ease-in;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-content h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: #203a43;
+    }
+    .modal-content p {
+      font-size: 1.1rem;
+      margin: 10px 0;
+    }
+    .modal-content label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .modal-content input[type="datetime-local"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #00d4ff;
+      margin-bottom: 15px;
+    }
+    .modal-content button {
+      width: 100%;
+      padding: 10px;
+      background: #00d4ff;
+      border: none;
+      border-radius: 5px;
+      color: #0f2027;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-content button:hover {
+      background: #00b3cc;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      color: #ff4d4d;
+      cursor: pointer;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 1rem;
+    }
+    .footer a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .data-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    .data-container::-webkit-scrollbar-thumb {
+      background: #00d4ff;
+      border-radius: 4px;
+    }
+    .data-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .panel {
+        width: 100%;
+      }
+      .header .logo {
+        height: 30px;
+      }
+      .settings-dropdown {
+        right: 0;
+        width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div style="display: flex; align-items: center;">
+      <img src="{{ url_for('static', path='images/iatt_logo.png') }}" alt="IATT Logo" class="logo">
+      <h1>Predictive Maintenance - {% if result %}{{ result.record.MachineID }}{% else %}Machine1{% endif %}</h1>
+    </div>
+    <div class="controls">
+      <select onchange="simulateFailure(this.value)">
+        <option value="None">Random</option>
+        <option value="General Failure">Simulate General Failure</option>
+        <option value="Excessive Tool Wear">Simulate Tool Wear</option>
+        <option value="Overheating">Simulate Overheating</option>
+        <option value="Vibration Issue">Simulate Vibration Issue</option>
+      </select>
+      <select onchange="window.location.href='/?machine_id=' + this.value" class="machine-select">
+        {% for machine in machines %}
+          <option value="{{ machine }}" {% if result and machine == result.record.MachineID %}selected{% endif %}>{{ machine }}</option>
+        {% endfor %}
+      </select>
+      <a href="#" onclick="toggleSettings()">Settings</a>
+      <div class="settings-dropdown" id="settingsDropdown">
+        <form id="settingsForm" action="/settings" method="post">
+          <label for="vibration_threshold">Vibration Threshold</label>
+          <input type="number" step="0.1" name="vibration_threshold" value="{{ settings.alert_thresholds.VibrationLevel }}" required>
+          <button type="submit">Save</button>
+        </form>
+      </div>
+      <a href="#" onclick="alert('Logout coming soon!')">Logout</a>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <!-- Sensor Data Panel -->
+    <div class="panel">
+      <h2><i class="fas fa-tachometer-alt"></i> Sensor Data</h2>
+      <div class="data-container">
+        {% if result %}
+          <div class="data-grid">
+            {% for key, value in result.record.items() %}
+              <div class="data-item">
+                <strong>{{ key }}:</strong> <span>{{ value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="data-grid">
+            <div class="data-item loading">
+              <p>Loading sensor data...</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Prediction Panel -->
+    <div class="panel">
+      <h2><i class="fas fa-cogs"></i> Prediction & Insights</h2>
+      <div class="prediction-container">
+        {% if result %}
+          <div class="status-card">
+            <span class="icon {{ result.prediction.health_score.status | lower }}"></span>
+            Machine Status: {{ result.prediction.health_score.status }} (Score: {{ result.prediction.health_score.score }})
+          </div>
+          {% if result.prediction.failure_type != "No Failures Detected" %}
+            <div class="alert" onclick="showModal()">
+              <i class="fas fa-exclamation-triangle"></i> Alert: {{ result.prediction.failure_type }} Detected!
+            </div>
+          {% endif %}
+          <div class="prediction-card">
+            <h3>{{ result.prediction.failure_type }}</h3>
+            <p>{{ result.prediction.recommendation_text }}</p>
+            <p><strong>Actions:</strong> {{ result.prediction.actions | join(", ") }}</p>
+          </div>
+          <div class="recommendations">
+            {% if result.prediction.similar_failures %}
+              {% for rec in result.prediction.similar_failures %}
+                <div class="recommendation-box">
+                  {% if rec.image and rec.image|length > 0 %}
+                    <img src="{{ url_for('static', path=rec.image) }}" alt="{{ rec.name }}">
+                  {% else %}
+                    <p>No image available for {{ rec.name }}</p>
+                  {% endif %}
+                  <p>{{ rec.name }}</p>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="recommendation-box error">
+                <p>No related failures detected or image data missing. Check backend data!</p>
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="status-card">
+            <span class="icon warning"></span> Machine Status: Unknown
+          </div>
+          <div class="prediction-card">
+            <p>Loading prediction...</p>
+          </div>
+          <div class="recommendations">
+            <div class="recommendation-box">
+              <p>Waiting for data</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Forecasting Panel -->
+    <div class="panel">
+      <h2><i class="fas fa-chart-line"></i> Forecasting</h2>
+      <div class="forecast-container">
+        {% if result %}
+          <div class="forecast-card">
+            <div>
+              <h3>Performance & Health Trends</h3>
+              <p><strong>Health:</strong> {{ result.prediction.forecast.health_trend }}</p>
+              <p><strong>Power:</strong> {{ result.prediction.forecast.performance_trend }}</p>
+              <p><strong>Confidence:</strong> {{ result.prediction.forecast.confidence }}</p>
+            </div>
+            <canvas id="forecastChart" class="forecast-chart"></canvas>
+          </div>
+        {% else %}
+          <div class="forecast-card">
+            <p>Loading forecast...</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="history-panel">
+      <h2><i class="fas fa-history"></i> Prediction History</h2>
+      {% if history %}
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Failure Type</th>
+              <th>Action</th>
+              <th>Forecast</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in history %}
+              <tr>
+                <td>{{ entry.timestamp }}</td>
+                <td>{{ entry.failure_type }}</td>
+                <td>{{ entry.action }}</td>
+                <td>{{ entry.forecast }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button class="download-btn" onclick="showDownloadModal('{{ result.record.MachineID }}')">Download Report</button>
+      {% else %}
+        <p>No history available yet...</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Modal for Alert Details -->
+  <div class="modal" id="alertModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideModal()">×</span>
+      {% if result and result.prediction.failure_type != "No Failures Detected" %}
+        <h3>{{ result.prediction.failure_type }}</h3>
+        <p>{{ result.prediction.recommendation_text }}</p>
+        <p><strong>Actions:</strong> {{ result.prediction.actions | join(", ") }}</p>
+        <p><strong>Forecast:</strong> {{ result.prediction.forecast.health_trend }} / {{ result.prediction.forecast.performance_trend }} (Confidence: {{ result.prediction.forecast.confidence }})</p>
+        <p><strong>Detected:</strong> {{ result.prediction.timestamp }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Modal for Download Date Range -->
+  <div class="modal" id="downloadModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideDownloadModal()">×</span>
+      <h3>Select Date Range for Report</h3>
+      <form id="downloadForm">
+        <label for="fromDate">From Date & Time:</label>
+        <input type="datetime-local" id="fromDate" name="from_date" required>
+        <label for="toDate">To Date & Time:</label>
+        <input type="datetime-local" id="toDate" name="to_date" required>
+        <button type="button" onclick="downloadHistoryReport()">Generate Report</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Powered by <a href="https://iattechnologies.com/" target="_blank">IAT Technologies</a></p>
+    <p>© 2025 Developed by Dev-Team</p>
+  </div>
+
+  <script>
+    // Global variable to control refresh
+    let refreshInterval;
+
+    // Start the auto-refresh when the page loads
+    function startRefresh() {
+      refreshInterval = setInterval(function() {
+        // Only refresh if the download modal is not visible
+        if (document.getElementById('downloadModal').style.display !== 'flex') {
+          window.location.reload();
+        }
+      }, 10000);
+    }
+
+    // Stop the auto-refresh
+    function stopRefresh() {
+      clearInterval(refreshInterval);
+    }
+
+    // Start refresh on page load
+    window.onload = startRefresh;
+
+    function simulateFailure(failureType) {
+      fetch(`/simulate/${failureType}`).then(response => response.json()).then(data => {
+        console.log(data.message);
+      });
+    }
+    function showModal() {
+      document.getElementById('alertModal').style.display = 'flex';
+    }
+    function hideModal() {
+      document.getElementById('alertModal').style.display = 'none';
+    }
+    function toggleSettings() {
+      const dropdown = document.getElementById('settingsDropdown');
+      dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch('/settings', {
+        method: 'POST',
+        body: formData
+      }).then(response => response.json()).then(data => {
+        console.log(data.message);
+        document.getElementById('settingsDropdown').style.display = 'none';
+      });
+    });
+
+    // Download Report Modal Functions
+    let currentMachineId = null;
+    function showDownloadModal(machineId) {
+      currentMachineId = machineId;
+      document.getElementById('downloadModal').style.display = 'flex';
+      stopRefresh(); // Pause refresh when modal opens
+    }
+    function hideDownloadModal() {
+      document.getElementById('downloadModal').style.display = 'none';
+      startRefresh(); // Resume refresh when modal closes
+    }
+    function downloadHistoryReport() {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      if (!fromDate || !toDate) {
+        alert('Please select both From and To dates.');
+        return;
+      }
+      if (!currentMachineId) {
+        alert('Error: Machine ID is missing.');
+        return;
+      }
+      const url = `/download_history?machine_id=${encodeURIComponent(currentMachineId)}&from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(toDate)}`;
+      console.log('Downloading history report:', { machineId: currentMachineId, fromDate, toDate, url });
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = `history_report_${currentMachineId}_${fromDate.split('T')[0]}_to_${toDate.split('T')[0]}.pdf`; // Adjust extension based on backend (pdf or txt)
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          hideDownloadModal(); // Close modal and resume refresh after download
+        })
+        .catch(error => {
+          console.error('Download failed:', error);
+          alert('Failed to download the report. Check the console for details.');
+        });
+    }
+
+    // Chart.js setup for Forecasting
+    {% if result and result.prediction.forecast.health_forecast and result.prediction.forecast.performance_forecast %}
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+          datasets: [
+            {
+              label: 'Machine Health',
+              data: {{ result.prediction.forecast.health_forecast | tojson }},
+              borderColor: '#00d4ff',
+              backgroundColor: 'rgba(0, 212, 255, 0.2)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Performance Score',
+              data: {{ result.prediction.forecast.performance_forecast | tojson }},
+              borderColor: '#ffcc00',
+              backgroundColor: 'rgba(255, 204, 0, 0.2)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: { display: true, text: 'Score', color: '#e0f7ff' },
+              ticks: { color: '#e0f7ff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            x: {
+              title: { display: true, text: 'Days', color: '#e0f7ff' },
+              ticks: { color: '#e0f7ff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#e0f7ff' } }
+          }
+        }
+      });
+    {% endif %}
+  </script>
+</body>
+</html>
